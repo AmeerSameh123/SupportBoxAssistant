@@ -29,6 +29,8 @@ cd frontend && npm install && cd ..
 
 # 2. run the evaluation over all 30 tickets  (~60s)
 cd backend && uv run python ../eval/run_eval.py && cd ..
+#    --repeat  runs twice and reports self-consistency
+#    --heuristic-only  scores the regex baseline alone, no model needed
 
 # 3. run the app  (two terminals)
 cd backend  && uv run uvicorn app.main:app --reload --port 8000
@@ -44,7 +46,7 @@ With `make` available, the same steps are `make setup`, `make eval`, then
 **The tests need none of the above** — no Ollama, no network:
 
 ```bash
-cd backend && uv run pytest -q        # 385 tests, ~17s
+cd backend && uv run pytest -q        # 385 tests, ~30s
 ```
 
 ---
@@ -86,10 +88,10 @@ Three more results worth stating plainly:
 - **Confidence is not calibrated.** Separation between correct and incorrect
   predictions is **−0.017**. My calibration made it marginally worse. Don't trust
   it as a ranking signal yet.
-- **Self-consistency is not guaranteed.** The committed run scored 100% across
-  two passes at temperature 0 with a fixed seed; an earlier paired run scored
-  96.7%. Local inference is usually but not reliably deterministic, so treat every
-  figure as carrying ~±1 ticket of run-to-run noise on top of its interval.
+- **Self-consistency is not guaranteed.** Three paired runs at temperature 0
+  with a fixed seed scored 96.7%, 100% and 93.3% — zero to two tickets flip on
+  any given pair. Treat every figure as carrying ~±1–2 tickets of run-to-run
+  noise *on top of* its sampling interval.
 
 ### What the Day-0 spike found
 
@@ -251,6 +253,7 @@ uv run ruff check . && uv run mypy    # clean, mypy --strict
 | **Unit** | repair, normalize, policy, safety, gate, heuristic, metrics, storage, LLM client |
 | **API** | 404, 409, 422, auth, rate limit, body cap, CORS, security headers, redaction |
 | **Architecture** | AST test asserting `domain/` has no outward dependencies |
+| **Integration** (`-m llm`) | Four tests against the real model, deselected by default. The offline suite proves the pipeline handles every response shape I have *seen*; this proves the wire format still matches what the endpoint does *today*. Skips rather than fails without Ollama. |
 
 Metrics are checked against **published reference values** and an independent
 re-derivation of the Wilson formula, not against the implementation's own output.

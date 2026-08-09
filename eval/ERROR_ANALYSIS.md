@@ -154,7 +154,7 @@ limitations section.
 | `fallback_rate` | 0.0 |
 | Escalation rate | 53.3% (16/30) |
 | Mean / p95 latency | 2135 ms / 2821 ms |
-| Self-consistency across two runs | **100%** (this run) / **96.7%** (an earlier pair) |
+| Self-consistency (paired runs) | **93.3%** committed; 96.7% and 100% observed earlier |
 
 ### The repair layer did no work in this run, and that needs saying
 
@@ -179,12 +179,13 @@ endpoint that ignores `json_schema` puts the 20% straight back.
 
 ### Self-consistency varies between runs, which is the actual finding
 
-The committed run scored **100%** — two passes at temperature 0 with a fixed seed
-agreed on all 30 tickets. An earlier paired run scored **96.7%**: one ticket in
-thirty flipped.
+I ran the paired determinism check three times at temperature 0 with a fixed
+seed. It scored **96.7%**, then **100%**, then **93.3%** (the committed run).
+Between zero and two of thirty tickets flip on any given pair.
 
-Reporting only the 100% would be the more flattering choice and the less honest
-one. Local inference is *usually* but not *reliably* deterministic here, so:
+Reporting the 100% alone would have been the flattering choice and the dishonest
+one — and I only know it was unrepresentative because I ran it more than once.
+Local inference here is *usually* but not *reliably* deterministic, so:
 **every number in this document carries roughly ±1 ticket of run-to-run noise on
 top of its sampling interval.** That is precisely why n=16 point estimates should
 not be read to one decimal place.

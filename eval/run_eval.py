@@ -162,7 +162,7 @@ def main() -> int:
     parser.add_argument(
         "--heuristic-only",
         action="store_true",
-        help="Score the regex fallback alone, as a baseline sanity check.",
+        help="Score the regex fallback alone. No model, no network, ~instant.",
     )
     args = parser.parse_args()
 
@@ -182,13 +182,23 @@ def main() -> int:
     print(f"Tickets    : {len(tickets)}   Labelled: {len(labels)}")
     print()
 
-    # ONE event loop for the whole run. The container owns an httpx.AsyncClient
-    # bound to the loop it was created in; separate asyncio.run() calls would
-    # close it from a different loop and raise "Event loop is closed" at exit.
     started = time.perf_counter()
-    results, self_consistency = asyncio.run(
-        _execute(container, tickets, force=args.no_cache, repeat=args.repeat)
-    )
+    if args.heuristic_only:
+        # The baseline on its own: no model, no network. Useful for checking
+        # what the regex alone is worth before attributing anything to the LLM,
+        # and it runs with Ollama stopped.
+        baseline = HeuristicTriageStrategy(container.assembler)
+        results = {t.id: baseline.triage_sync(t) for t in tickets}
+        self_consistency = 1.0  # deterministic by construction
+        asyncio.run(container.aclose())
+    else:
+        # ONE event loop for the whole run. The container owns an
+        # httpx.AsyncClient bound to the loop it was created in; separate
+        # asyncio.run() calls would close it from a different loop and raise
+        # "Event loop is closed" at exit.
+        results, self_consistency = asyncio.run(
+            _execute(container, tickets, force=args.no_cache, repeat=args.repeat)
+        )
     duration = time.perf_counter() - started
 
     # --- heuristic baseline: no model, same tickets, same scoring ------------
@@ -254,6 +264,7 @@ def main() -> int:
         "wall_clock_seconds": round(duration, 1),
         "python": platform.python_version(),
         "cache_bypassed": args.no_cache,
+        "heuristic_only": args.heuristic_only,
     }
 
     # --- results.json --------------------------------------------------------
@@ -290,11 +301,15 @@ def main() -> int:
             "escalated": sorted(tid for tid, r in results.items() if r.escalate),
         },
     }
-    (EVAL_DIR / "results.json").write_text(
+    # A diagnostic mode must never overwrite the graded deliverable. The
+    # baseline run writes beside results.json, not over it.
+    results_name = "results.heuristic.json" if args.heuristic_only else "results.json"
+    report_name = "report.heuristic.md" if args.heuristic_only else "report.md"
+    (EVAL_DIR / results_name).write_text(
         json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8"
     )
 
-    (EVAL_DIR / "report.md").write_text(
+    (EVAL_DIR / report_name).write_text(
         render_report(
             category_pairs=category_pairs,
             priority_pairs=priority_pairs,
@@ -314,6 +329,9 @@ def main() -> int:
     )
 
     _print_summary(
+        args.heuristic_only,
+        results_name,
+        report_name,
         category_score,
         priority_score,
         within_one,
@@ -328,6 +346,9 @@ def main() -> int:
 
 
 def _print_summary(
+    heuristic_only: bool,
+    results_name: str,
+    report_name: str,
     category: Score,
     priority: Score,
     within_one: Score,
@@ -355,8 +376,9 @@ def _print_summary(
     print(f"disagreements      {len(disagreements)}")
     print(f"wall clock         {duration:.1f}s")
     print("=" * 66)
-    print("wrote eval/results.json and eval/report.md")
-    print("Now read the disagreements and update eval/ERROR_ANALYSIS.md by hand.")
+    print(f"wrote eval/{results_name} and eval/{report_name}")
+    if not heuristic_only:
+        print("Now read the disagreements and update eval/ERROR_ANALYSIS.md by hand.")
 
 
 if __name__ == "__main__":
