@@ -1,0 +1,58 @@
+Hi Ameer,
+Hope all is well! — here's a small, realistic exercise we'd love you to take on.
+
+THE TASK — SUPPORT INBOX ASSISTANT
+
+A support team is drowning in inbound messages. Build a small full-stack app that does the first-pass triage for each message and produces, per message:
+
+category — one of: billing, bug, feature request, account, security, other
+priority — one of: low, medium, high, urgent
+summary — one line
+suggested reply — a draft the agent can edit
+confidence — 0.0 to 1.0, so low-confidence items can be escalated
+A human reviews everything; you're making their first pass fast and trustworthy, not auto-sending anything. Three parts:
+
+Backend / API returning the structured triage. Treat the LLM as unreliable — it will sometimes return malformed or out-of-schema output; handle that.
+Review-queue frontend — list tickets, show the triage, let a human edit the reply and approve/reject. Functional over fancy.
+Evaluation harness — run your pipeline over all 30 tickets, report metrics (at least category accuracy and priority agreement) against the labeled subset, plus a short, honest error analysis (where it fails, why, what you'd do next).
+Time-box: about 2 days. We don't expect polish — we want a working thing, sharp prioritization, and clear notes on trade-offs and corners cut. Smaller and well-reasoned beats sprawling and unfinished.
+
+THE MODEL — FREE AND LOCAL, THE SAME FOR EVERYONE
+
+Install Ollama and pull the model (one-time ~2GB, then fully offline):
+
+ollama pull llama3.2:3b
+
+
+Ollama serves an OpenAI-compatible endpoint at http://localhost:11434/v1. Make your LLM connection configurable via environment variables — LLM_BASE_URL, LLM_MODEL, LLM_API_KEY — and target an OpenAI-compatible endpoint (most SDKs need only a base-URL override). Don't hardcode them, and never commit API keys.
+
+ATTACHED — TWO JSON FILES
+
+tickets.json — 30 inbound messages to triage. Deliberately messy: some clear, some ambiguous, a few adversarial or low-quality. Handle them gracefully.
+labels.json — ground-truth category + priority for a subset, for your eval. Don't overfit — report accuracy honestly; that's the point of an eval.
+Have your eval write eval/results.json in this shape:
+
+{
+  "metrics": { "category_accuracy": 0.0, "priority_agreement": 0.0 },
+  "predictions": [
+    { "id": "T-001", "category": "billing", "priority": "high",
+      "summary": "...", "suggested_reply": "...", "confidence": 0.9, "escalate": false }
+  ]
+}
+
+
+— one prediction per ticket (all 30).
+
+WHAT WE LOOK FOR
+
+A reliable AI layer (schema validation, retries/fallbacks, sensible behavior on bad input), evaluation rigor and honesty, clean code, good product/safety judgment on the tricky tickets, a clear README, and a working end-to-end demo.
+
+SUBMITTING
+
+Reply with a link to a public GitHub repository, including a README covering how to install/run, which env vars to set, how to run the eval and where to read results, and your decisions, trade-offs, limitations, and next steps. If something's unfinished, say so and why.
+
+TOOLS AND THE INTERVIEW
+
+Use whatever helps you build, AI assistants included — we do too. Because of that, the submission is our starting point, not the finish line: in the interview we'll walk through it together — you'll explain why you built it the way you did and how you'd extend it. So send something you understand well and can reason about with us in the room.
+
+Please send it back by [Thursday]. We'll read it beforehand and go deep together live. Any questions — just reply. Good luck!
