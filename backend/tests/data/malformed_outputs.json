@@ -1,0 +1,252 @@
+{
+  "_README": "Fixtures for tests/unit/test_repair.py and test_normalize.py. source=captured are REAL llama3.2:3b responses recorded during the Day-0 spike (2026-08-09, mode=json_object, temperature=0, seed=42) - not invented. source=constructed are classic malformation modes the 30-ticket spike did not happen to produce but which the repair layer must survive; they are labelled honestly rather than passed off as observations. expect: clean=parsed as-is | recovered=repair succeeded | unrecoverable=must raise SchemaViolation.",
+  "captured_from": {
+    "model": "llama3.2:3b",
+    "ollama_version": "0.32.6",
+    "date": "2026-08-09",
+    "response_format": "json_object",
+    "temperature": 0,
+    "seed": 42
+  },
+  "cases": [
+    {
+      "name": "schema_echo_recoverable_empty_body",
+      "source": "captured",
+      "ticket_id": "T-030",
+      "note": "Model returned the SCHEMA, but committed its answer inside single-value enums. Recoverable.",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"other\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":\"Help please\",\"suggested_reply\":\"\",\"confidence\":0.1}}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "other",
+        "priority": "low"
+      }
+    },
+    {
+      "name": "schema_echo_recoverable_junk_body",
+      "source": "captured",
+      "ticket_id": "T-004",
+      "note": "Same hybrid echo on the junk ticket; summary/suggested_reply appear as bare scalars.",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"other\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":\"Empty message\",\"suggested_reply\":\"\",\"confidence\":0.1} }",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "other",
+        "priority": "low"
+      }
+    },
+    {
+      "name": "schema_echo_recoverable_injection_ticket",
+      "source": "captured",
+      "ticket_id": "T-008",
+      "note": "Echoed enum is ['other','low']; 'low' is not a legal category, so intersecting with the legal set leaves exactly one -> 'other'. summary/suggested_reply stay schema-shaped and take defaults.",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"other\",\"low\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":{\"type\":\"string\",\"description\":\"One line, max 200 characters, factual.\",\"maxLength\":200},\"suggested_reply\":\"\",\"confidence\":0} }",
+      "expect": "recovered",
+      "expect_fields": {
+        "priority": "low"
+      }
+    },
+    {
+      "name": "schema_echo_unrecoverable_full_enums",
+      "source": "captured",
+      "ticket_id": "T-009",
+      "note": "Pure echo: all six category values still present, so the model committed to nothing. Must NOT be guessed at.",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"billing\",\"bug\",\"feature_request\",\"account\",\"security\",\"other\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\",\"medium\",\"high\",\"urgent\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":\"Invoice needed for accounting\",\"suggested_reply\":\"\",\"confidence\":0.9} \n\n  }",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "schema_echo_recoverable_selfresolved",
+      "source": "captured",
+      "ticket_id": "T-023",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"other\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":\"nvm figured it out, thanks anyway\",\"suggested_reply\":\"\",\"confidence\":0} }",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "other",
+        "priority": "low"
+      }
+    },
+    {
+      "name": "schema_echo_unrecoverable_ambiguous_enum",
+      "source": "captured",
+      "ticket_id": "T-024",
+      "raw": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"category\",\"priority\",\"summary\",\"suggested_reply\",\"confidence\"],\"properties\":{\"category\":{\"type\":\"string\",\"enum\":[\"account\",\"other\"],\"description\":\"The single best-fitting category.\"},\"priority\":{\"type\":\"string\",\"enum\":[\"low\"],\"description\":\"Urgency of the CURRENT impact on the customer.\"},\"summary\":\"We're evaluating you for a 200-seat rollout. Hard requirement: SAML SSO with Okta, and SCIM provisioning.\",\"suggested_reply\":\"\",\"confidence\":0} }",
+      "expect": "unrecoverable",
+      "note": "Echo narrows category to ['account','other'] - two LEGAL values survive, so the model committed to nothing. Must repair-retry, not guess. Contrast with T-008 where only one legal value survives."
+    },
+    {
+      "name": "clean_passthrough",
+      "source": "constructed",
+      "raw": "{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}",
+      "expect": "clean",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "fenced_json",
+      "source": "constructed",
+      "raw": "```json\n{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}\n```",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "fenced_bare",
+      "source": "constructed",
+      "raw": "```\n{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}\n```",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "prose_leading",
+      "source": "constructed",
+      "raw": "Here is the triage:\n{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "prose_trailing",
+      "source": "constructed",
+      "raw": "{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}\n\nLet me know if you need anything else!",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "prose_both",
+      "source": "constructed",
+      "raw": "Sure! Here you go:\n{\"category\":\"billing\",\"priority\":\"high\",\"summary\":\"Duplicate charge\",\"suggested_reply\":\"We are looking into it.\",\"confidence\":0.9}\nHope that helps.",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "billing"
+      }
+    },
+    {
+      "name": "trailing_comma",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":0.5,}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "bug"
+      }
+    },
+    {
+      "name": "single_quotes",
+      "source": "constructed",
+      "raw": "{'category':'bug','priority':'low','summary':'x','suggested_reply':'y','confidence':0.4}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "bug"
+      }
+    },
+    {
+      "name": "enum_synonym_category",
+      "source": "constructed",
+      "raw": "{\"category\":\"Feature Request\",\"priority\":\"medium\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":0.7}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "feature_request"
+      }
+    },
+    {
+      "name": "enum_synonym_priority",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"P1\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":0.7}",
+      "expect": "recovered",
+      "expect_fields": {
+        "priority": "urgent"
+      }
+    },
+    {
+      "name": "confidence_as_word",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":\"high\"}",
+      "expect": "recovered",
+      "expect_fields": {
+        "confidence": 0.8
+      }
+    },
+    {
+      "name": "confidence_as_percent",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":\"90%\"}",
+      "expect": "recovered",
+      "expect_fields": {
+        "confidence": 0.9
+      }
+    },
+    {
+      "name": "confidence_out_of_range",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":1.7}",
+      "expect": "recovered",
+      "expect_fields": {
+        "confidence": 1.0
+      }
+    },
+    {
+      "name": "null_reply",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":null,\"confidence\":0.6}",
+      "expect": "recovered",
+      "expect_fields": {
+        "suggested_reply": ""
+      }
+    },
+    {
+      "name": "nested_object_survives",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":0.6,\"meta\":{\"a\":{\"b\":1}}}",
+      "expect": "recovered",
+      "expect_fields": {
+        "category": "bug"
+      }
+    },
+    {
+      "name": "truncated_midstring",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":\"high\",\"summary\":\"the app crashes when",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "truncated_midobject",
+      "source": "constructed",
+      "raw": "{\"category\":\"bug\",\"priority\":",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "no_json_refusal",
+      "source": "constructed",
+      "raw": "I'm sorry, I can't help with that request.",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "empty_string",
+      "source": "constructed",
+      "raw": "",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "whitespace_only",
+      "source": "constructed",
+      "raw": "   \n\t  ",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "not_an_object",
+      "source": "constructed",
+      "raw": "[\"billing\",\"high\"]",
+      "expect": "unrecoverable"
+    },
+    {
+      "name": "unknown_category",
+      "source": "constructed",
+      "raw": "{\"category\":\"pricing_question\",\"priority\":\"high\",\"summary\":\"x\",\"suggested_reply\":\"y\",\"confidence\":0.6}",
+      "expect": "unrecoverable"
+    }
+  ]
+}

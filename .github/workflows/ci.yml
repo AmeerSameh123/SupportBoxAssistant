@@ -1,0 +1,56 @@
+name: CI
+
+# The whole point of this workflow: it is green on a runner that has never heard
+# of Ollama. If the test suite needed a live model, it would not be a test suite —
+# it would be a demo (PRD §12).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --group dev
+
+      - name: Lint
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Typecheck
+        run: uv run mypy
+
+      - name: Test (offline — no LLM)
+        run: uv run pytest -q --cov --cov-report=term-missing
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck and build
+        run: npm run build

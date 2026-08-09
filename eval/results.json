@@ -1,0 +1,513 @@
+{
+  "metrics": {
+    "category_accuracy": 0.875,
+    "priority_agreement": 0.5
+  },
+  "predictions": [
+    {
+      "id": "T-001",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Duplicate charge for June subscription",
+      "suggested_reply": "We apologize for the error. Please contact our billing team at [insert contact info] to resolve this issue.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "T-002",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "App crashes on export to PDF",
+      "suggested_reply": "We apologize for the inconvenience. Please try exporting again and if the issue persists, contact us at support@company.com so we can assist you further.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-003",
+      "category": "feature_request",
+      "priority": "low",
+      "summary": "Request for dark mode in new dashboard",
+      "suggested_reply": "We appreciate your suggestion and will consider adding a dark mode feature in the future.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-004",
+      "category": "other",
+      "priority": "low",
+      "summary": "Message appears to be a test or keyboard mash.",
+      "suggested_reply": "Insufficient information - human review required.",
+      "confidence": 0.0,
+      "escalate": true
+    },
+    {
+      "id": "T-005",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Locked out of account and billing question",
+      "suggested_reply": "We apologize for the inconvenience. Please try resetting your password and if you still can't log in, contact us for assistance. Your plan renewal date is available on your account dashboard.",
+      "confidence": 0.56,
+      "escalate": false
+    },
+    {
+      "id": "T-006",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "API returning 503 for 40 minutes, ops team blocked",
+      "suggested_reply": "I have escalated this issue to our engineering team. They will investigate and provide an update as soon as possible.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-007",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Data policy questions about GDPR compliance",
+      "suggested_reply": "We take data privacy seriously, but our models are not trained on customer data. Data is stored in a secure, EU-compliant environment.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-008",
+      "category": "other",
+      "priority": "low",
+      "summary": "help",
+      "suggested_reply": "This message appears to contain instructions directed at an automated system rather than a support request. It has not been actioned and is flagged for manual review.",
+      "confidence": 0.0,
+      "escalate": true
+    },
+    {
+      "id": "T-009",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Invoice needed for accounting",
+      "suggested_reply": "Hello Helios Ltd, we have processed your May payment. An invoice with your company VAT number will be sent to you shortly.",
+      "confidence": 0.9,
+      "escalate": false
+    },
+    {
+      "id": "T-010",
+      "category": "billing",
+      "priority": "urgent",
+      "summary": "Error updating credit card in account",
+      "suggested_reply": "We apologize for the inconvenience. Please try updating your credit card again and if you continue to experience issues, contact our support team.",
+      "confidence": 0.72,
+      "escalate": true
+    },
+    {
+      "id": "T-011",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Importing 5000 contacts from CSV not available",
+      "suggested_reply": "We appreciate your feedback! Currently, our import feature is limited to one-by-one additions. We'll consider this a feature request and will look into adding bulk import capabilities in the future.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-012",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Sync bug with calendar events not showing up on mobile",
+      "suggested_reply": "We apologize for the ongoing issue with your sync bug. We have seen previous reports from you (tickets #4471 and #4502) about this problem. Our team is working to resolve it as soon as possible. Please contact us again if the issue persists.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-013",
+      "category": "account",
+      "priority": "medium",
+      "summary": "Invite colleague to workspace",
+      "suggested_reply": "Please check your workspace settings for the invitation link.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-014",
+      "category": "security",
+      "priority": "urgent",
+      "summary": "Possible vulnerability disclosure - IDOR on /reports/{id} endpoint",
+      "suggested_reply": "Thank you for reporting this responsibly. We will follow up with a security contact privately to discuss further details.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-015",
+      "category": "other",
+      "priority": "low",
+      "summary": "Empty message with no real information",
+      "suggested_reply": "",
+      "confidence": 0.1,
+      "escalate": true
+    },
+    {
+      "id": "T-016",
+      "category": "bug",
+      "priority": "medium",
+      "summary": "Reports page slow load times since Thursday",
+      "suggested_reply": "We are investigating reports of slow load times on the reports page. We will provide an update as soon as possible.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-017",
+      "category": "billing",
+      "priority": "urgent",
+      "summary": "Request to cancel subscription",
+      "suggested_reply": "We have cancelled your subscription effective immediately. You will not be billed again. If you need assistance with anything else, please contact us at support@company.com.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-018",
+      "category": "bug",
+      "priority": "urgent",
+      "summary": "Service not functioning as expected",
+      "suggested_reply": "We apologize for the inconvenience. Can you please provide more details about the issue so we can assist you better?",
+      "confidence": 0.45,
+      "escalate": true
+    },
+    {
+      "id": "T-019",
+      "category": "security",
+      "priority": "urgent",
+      "summary": "Webhook signature mismatch reported by customer",
+      "suggested_reply": "Thank you for reporting this issue. We will investigate and follow up with a security contact to address the HMAC verification failure.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-020",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Difference between Pro and Team plans",
+      "suggested_reply": ", please visit our website for a detailed feature comparison: https://example.com/feature-comparison",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-021",
+      "category": "account",
+      "priority": "urgent",
+      "summary": "Data deletion request under GDPR",
+      "suggested_reply": ", please confirm in writing once done, as required by GDPR. A security contact will follow up privately to arrange for data deletion.\\n\nThank you for bringing this to our attention.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-022",
+      "category": "bug",
+      "priority": "medium",
+      "summary": "Push notifications stopped working on iOS after app update v4.2.1",
+      "suggested_reply": "We apologize for the inconvenience. Please try updating to the latest version of our app and see if that resolves the issue.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-023",
+      "category": "other",
+      "priority": "low",
+      "summary": "Empty message",
+      "suggested_reply": "",
+      "confidence": 0.0,
+      "escalate": true
+    },
+    {
+      "id": "T-024",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Evaluating SSO / SAML for 200 users with hard requirement of Okta and SCIM provisioning",
+      "suggested_reply": "",
+      "confidence": 0.7,
+      "escalate": false
+    },
+    {
+      "id": "T-025",
+      "category": "billing",
+      "priority": "urgent",
+      "summary": "Annual plan charge error, refund requested",
+      "suggested_reply": "We apologize for the mistake. Your annual plan charge has been reversed and a refund of $199 will be processed within 24 hours.",
+      "confidence": 0.9,
+      "escalate": true
+    },
+    {
+      "id": "T-026",
+      "category": "other",
+      "priority": "low",
+      "summary": "empty message",
+      "suggested_reply": "",
+      "confidence": 0.0,
+      "escalate": true
+    },
+    {
+      "id": "T-027",
+      "category": "feature_request",
+      "priority": "medium",
+      "summary": "Exporting all account data",
+      "suggested_reply": "We are currently exploring options for exporting user data in a variety of formats. We will provide an update on our progress in our next release.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-028",
+      "category": "billing",
+      "priority": "medium",
+      "summary": "Extra charge on card",
+      "suggested_reply": "",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-029",
+      "category": "bug",
+      "priority": "medium",
+      "summary": "503 errors from this morning - is it resolved now?",
+      "suggested_reply": "We are investigating the issue and will provide an update as soon as possible.",
+      "confidence": 0.8,
+      "escalate": false
+    },
+    {
+      "id": "T-030",
+      "category": "other",
+      "priority": "low",
+      "summary": "Message is only 11 characters long.",
+      "suggested_reply": "Insufficient information - human review required.",
+      "confidence": 0.0,
+      "escalate": true
+    }
+  ],
+  "run_metadata": {
+    "generated_at": "2026-08-09T15:29:49.032709+00:00",
+    "model": "llama3.2:3b",
+    "base_url": "http://localhost:11434/v1",
+    "prompt_version": "triage/v2",
+    "response_format": "json_schema",
+    "temperature": 0.0,
+    "seed": 42,
+    "confidence_mode": "self_reported",
+    "escalate_threshold": 0.55,
+    "wall_clock_seconds": 63.0,
+    "python": "3.13.14",
+    "cache_bypassed": true
+  },
+  "extended_metrics": {
+    "labelled_subset_size": 16,
+    "category_accuracy_detail": {
+      "rate": 0.875,
+      "correct": 14,
+      "total": 16,
+      "wilson_95_low": 0.6398,
+      "wilson_95_high": 0.965
+    },
+    "priority_agreement_detail": {
+      "rate": 0.5,
+      "correct": 8,
+      "total": 16,
+      "wilson_95_low": 0.28,
+      "wilson_95_high": 0.72
+    },
+    "priority_within_one": {
+      "rate": 0.9375,
+      "correct": 15,
+      "total": 16,
+      "wilson_95_low": 0.7167,
+      "wilson_95_high": 0.9889
+    },
+    "majority_class_baseline": {
+      "rate": 0.375,
+      "correct": 6,
+      "total": 16,
+      "wilson_95_low": 0.1848,
+      "wilson_95_high": 0.6136
+    },
+    "heuristic_fallback_baseline": {
+      "rate": 0.8125,
+      "correct": 13,
+      "total": 16,
+      "wilson_95_low": 0.5699,
+      "wilson_95_high": 0.9341
+    },
+    "cohens_kappa_category": 0.8367,
+    "cohens_kappa_priority": 0.3155,
+    "macro_f1_category": 0.6277,
+    "calibration_raw": {
+      "mean_confidence_when_correct": 0.8429,
+      "mean_confidence_when_incorrect": 0.85,
+      "separation": -0.0071,
+      "n_correct": 14,
+      "n_incorrect": 2
+    },
+    "calibration_shipped": {
+      "mean_confidence_when_correct": 0.8257,
+      "mean_confidence_when_incorrect": 0.85,
+      "separation": -0.0243,
+      "n_correct": 14,
+      "n_incorrect": 2
+    },
+    "self_consistency": 1.0,
+    "pipeline_health": {
+      "total_tickets": 30,
+      "by_stage": {
+        "llm": 28,
+        "quality_gate": 2
+      },
+      "llm_success_rate": 0.9333,
+      "repair_rate": 0.0,
+      "retry_rate": 0.0357,
+      "fallback_rate": 0.0,
+      "escalation_rate": 0.5333,
+      "degraded_count": 0,
+      "injection_detected_count": 1,
+      "spam_detected_count": 1,
+      "repair_taxonomy": {},
+      "failure_taxonomy": {
+        "schema_invalid": 1
+      },
+      "latency_ms_mean": 2244.8,
+      "latency_ms_p95": 5547.0
+    }
+  },
+  "diagnostics": {
+    "disagreements": [
+      {
+        "id": "T-001",
+        "field": "priority",
+        "gold": "high",
+        "predicted": "medium",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Charged twice for June"
+      },
+      {
+        "id": "T-002",
+        "field": "priority",
+        "gold": "high",
+        "predicted": "urgent",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "App crashes on export"
+      },
+      {
+        "id": "T-005",
+        "field": "priority",
+        "gold": "high",
+        "predicted": "medium",
+        "confidence": 0.5599999999999999,
+        "stage": "llm",
+        "subject": "Can't log in AND billing question"
+      },
+      {
+        "id": "T-007",
+        "field": "category",
+        "gold": "other",
+        "predicted": "account",
+        "confidence": 0.8,
+        "stage": "llm",
+        "subject": "Question about your data policy"
+      },
+      {
+        "id": "T-009",
+        "field": "priority",
+        "gold": "low",
+        "predicted": "medium",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Invoice needed for accounting"
+      },
+      {
+        "id": "T-012",
+        "field": "priority",
+        "gold": "high",
+        "predicted": "urgent",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Third time asking"
+      },
+      {
+        "id": "T-013",
+        "field": "priority",
+        "gold": "low",
+        "predicted": "medium",
+        "confidence": 0.8,
+        "stage": "llm",
+        "subject": "how do I add a teammate"
+      },
+      {
+        "id": "T-017",
+        "field": "priority",
+        "gold": "medium",
+        "predicted": "urgent",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Cancel my subscription"
+      },
+      {
+        "id": "T-019",
+        "field": "category",
+        "gold": "bug",
+        "predicted": "security",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Webhook signature mismatch"
+      },
+      {
+        "id": "T-021",
+        "field": "priority",
+        "gold": "high",
+        "predicted": "urgent",
+        "confidence": 0.9,
+        "stage": "llm",
+        "subject": "Data deletion request"
+      }
+    ],
+    "per_ticket_stage": {
+      "T-001": "llm",
+      "T-002": "llm",
+      "T-003": "llm",
+      "T-004": "quality_gate",
+      "T-005": "llm",
+      "T-006": "llm",
+      "T-007": "llm",
+      "T-008": "llm",
+      "T-009": "llm",
+      "T-010": "llm",
+      "T-011": "llm",
+      "T-012": "llm",
+      "T-013": "llm",
+      "T-014": "llm",
+      "T-015": "llm",
+      "T-016": "llm",
+      "T-017": "llm",
+      "T-018": "llm",
+      "T-019": "llm",
+      "T-020": "llm",
+      "T-021": "llm",
+      "T-022": "llm",
+      "T-023": "llm",
+      "T-024": "llm",
+      "T-025": "llm",
+      "T-026": "llm",
+      "T-027": "llm",
+      "T-028": "llm",
+      "T-029": "llm",
+      "T-030": "quality_gate"
+    },
+    "escalated": [
+      "T-002",
+      "T-004",
+      "T-006",
+      "T-008",
+      "T-010",
+      "T-012",
+      "T-014",
+      "T-015",
+      "T-017",
+      "T-018",
+      "T-019",
+      "T-021",
+      "T-023",
+      "T-025",
+      "T-026",
+      "T-030"
+    ]
+  }
+}

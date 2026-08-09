@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/api/client.ts","./src/api/types.ts","./src/components/confidencemeter.tsx","./src/components/queueitem.tsx","./src/components/queuelist.tsx","./src/components/replyeditor.tsx","./src/components/ticketdetail.tsx","./src/components/triagebadges.tsx","./src/hooks/usereviewqueue.ts"],"version":"5.9.3"}

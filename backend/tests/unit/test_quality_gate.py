@@ -1,27 +1,81 @@
-"""Pre-LLM quality gate (app.triage.quality_gate).
+"""The pre-LLM screen (app.triage.quality_gate).
 
-Refusing to guess is the correct product behaviour: sending an empty string to an
-LLM and asking for a category invites confident nonsense (PRD §6.1 stage 1).
-
-Short-circuits (no LLM call, result is other/low/confidence 0.0/escalate True):
-  - T-030: subject "Help please", body "" -> empty body
-  - body is whitespace only
-  - T-004: "asdkjhasd test test ignore" -> below MIN_SIGNAL_CHARS, no dictionary-shaped content
-  - subject and body both empty
-
-Does NOT fire — the gate is deliberately conservative, because a false positive
-here silently drops a real ticket:
-  - T-028: "my card shows 58 but the plan is 49? where does the extra come from"
-      short, but unambiguously a real billing question
-  - T-018: "doesnt work anymore. please fix asap"
-      low-information but a genuine complaint; handled by confidence penalty
-      (test_policy.py), not by the gate
-  - T-023: "nvm figured it out, thanks anyway"
-      short and self-resolved, but real -> reaches the LLM and is triaged other/low
-  - T-010: Spanish body -> non-English is not low-signal
-
-Asserted invariants:
-  - a short-circuit result is schema-valid and carries the fixed
-    "Insufficient information — human review required." reply
-  - the gate performs zero I/O and never calls the ChatClient
+More negative cases than positive ones, deliberately. A false negative costs one
+wasted 1.5s model call; a false positive silently drops a real customer's ticket.
+Those are not symmetric (PRD §7.1 stage 1).
 """
+
+from __future__ import annotations
+
+import pytest
+
+from app.triage.quality_gate import QualityGate
+
+
+@pytest.fixture
+def gate() -> QualityGate:
+    return QualityGate(min_signal_chars=15)
+
+
+class TestGateFires:
+    def test_empty_body_and_subject(self, gate, ticket_by_id):
+        verdict = gate.assess(ticket_by_id["T-030"].model_copy(update={"subject": ""}))
+        assert verdict is not None
+        assert verdict.reason == "empty_message"
+
+    def test_whitespace_only(self, gate, ticket_by_id):
+        ticket = ticket_by_id["T-030"].model_copy(update={"subject": "   ", "body": "\n\t  "})
+        assert gate.assess(ticket) is not None
+
+    def test_keyboard_mash_t004(self, gate, ticket_by_id):
+        """T-004 is 'asdkjhasd test test ignore' - 26 chars, so length alone does
+        not catch it. The mash detector does."""
+        verdict = gate.assess(ticket_by_id["T-004"])
+        assert verdict is not None
+        assert verdict.reason == "no_lexical_content"
+
+    def test_below_min_signal_chars(self, gate, ticket_by_id):
+        ticket = ticket_by_id["T-001"].model_copy(update={"subject": "", "body": "hi"})
+        verdict = gate.assess(ticket)
+        assert verdict is not None
+        assert verdict.reason == "below_min_signal_chars"
+
+
+class TestGateDoesNotFire:
+    """The conservative half. Every one of these is a real ticket."""
+
+    @pytest.mark.parametrize(
+        "ticket_id",
+        [
+            "T-001",  # ordinary billing
+            "T-018",  # "doesnt work anymore. please fix asap" - low info, real
+            "T-023",  # "nvm figured it out, thanks anyway" - short, real
+            "T-028",  # short billing question with numbers
+            "T-010",  # Spanish: non-English is not low-signal
+            "T-008",  # injection is a real message and must reach classification
+            "T-026",  # a typo report is trivial but genuine
+        ],
+    )
+    def test_real_tickets_pass_through(self, gate, ticket_by_id, ticket_id):
+        assert gate.assess(ticket_by_id[ticket_id]) is None
+
+    def test_word_test_in_a_real_sentence_is_not_junk(self, gate, ticket_by_id):
+        ticket = ticket_by_id["T-001"].model_copy(
+            update={"subject": "", "body": "Our test environment is returning 503 errors."}
+        )
+        assert gate.assess(ticket) is None
+
+
+class TestGateProperties:
+    def test_gate_performs_no_io(self, gate, ticket_by_id):
+        """Asserted structurally: the gate takes only a Ticket and returns a
+        verdict. If it grew a dependency this signature would have to change."""
+        import inspect
+
+        signature = inspect.signature(gate.assess)
+        assert list(signature.parameters) == ["ticket"]
+
+    def test_verdict_carries_a_reason_for_the_reviewer(self, gate, ticket_by_id):
+        verdict = gate.assess(ticket_by_id["T-004"])
+        assert verdict is not None
+        assert verdict.reason and verdict.summary

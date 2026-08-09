@@ -1,0 +1,122 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "support-inbox-assistant"
+version = "0.1.0"
+description = "First-pass triage for a support inbox, with a human in the loop."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+# Runtime dependencies are deliberately few. Every one of them is justified:
+#   fastapi           - the API deliverable
+#   pydantic          - the schema validation the brief asks for, at every boundary
+#   pydantic-settings - the ONLY reader of os.environ (PRD §13)
+#   httpx             - async HTTP to the OpenAI-compatible endpoint
+#   uvicorn           - ASGI server
+# Notably absent: an LLM SDK. The wire format is ~40 lines of JSON over HTTP and
+# owning it means the adapter has no opinions imposed on it (PRD §6.1, Adapter).
+# Also absent: tenacity (retry) and pybreaker (circuit breaker) — both hand-written
+# so the semantics are mine to explain (PRD §6.2).
+dependencies = [
+    "fastapi>=0.141.0",
+    "pydantic>=2.13.0",
+    "pydantic-settings>=2.7.0",
+    "httpx>=0.28.0",
+    "uvicorn[standard]>=0.34.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.0",
+    "pytest-asyncio>=1.0.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.0",
+    "mypy>=1.14.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+# ---------------------------------------------------------------------------
+# pytest — offline and deterministic by default (PRD §12)
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# `-m "not llm"` is the DEFAULT, not a flag someone has to remember. CI must be
+# green on a machine that has never heard of llama3.2.
+addopts = "-m 'not llm' --strict-markers --strict-config"
+markers = [
+    "llm: requires a live LLM endpoint; deselected by default, run with -m llm",
+]
+asyncio_mode = "auto"
+# Warnings are errors, so a deprecation in our own code fails the build rather
+# than accumulating. The two ignores are third-party and outside our control:
+# Starlette's TestClient warns about its own httpx dependency.
+filterwarnings = [
+    "error",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated:DeprecationWarning",
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated",
+]
+
+[tool.coverage.run]
+source = ["app"]
+omit = ["app/main.py"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
+
+# ---------------------------------------------------------------------------
+# ruff — lint + format. Replaces black, isort, flake8, pyupgrade.
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "B",        # bugbear
+    "SIM",      # simplify
+    "C4",       # comprehensions
+    "TID",      # tidy-imports
+    "PTH",      # use pathlib
+    "RUF",      # ruff-specific
+    "ANN",      # missing annotations
+    "S",        # bandit security rules
+]
+ignore = [
+    "ANN401",  # Any is occasionally correct at the LLM boundary
+    "S101",    # assert is how pytest works
+    "E501",    # line length is enforced by the formatter, not the linter
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests may use magic values and hardcoded "secrets" (they are fixtures, not secrets).
+"tests/**" = ["ANN", "S105", "S106", "S311"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+# ---------------------------------------------------------------------------
+# mypy — strict. The domain and triage layers are where a type error becomes a
+# wrong answer rather than a crash, so they get no leniency at all.
+# ---------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+show_error_codes = true
+files = ["app"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
