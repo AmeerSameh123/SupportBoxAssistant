@@ -1,0 +1,44 @@
+# --- Secrets. Never commit. (PRD §10.1) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+
+# --- Node / frontend ---
+node_modules/
+frontend/dist/
+.vite/
+npm-debug.log*
+
+# --- Runtime state, not source (PRD §4) ---
+# Review decisions are created at runtime and auto-created on first write.
+data/reviews.json
+# Triage cache is derived data, keyed on prompt version + model.
+.cache/
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Local agent config ---
+.claude/settings.local.json
+
+# --- Local reference only, not for publication ---
+Task.txt
