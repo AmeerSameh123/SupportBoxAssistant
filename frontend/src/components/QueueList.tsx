@@ -33,7 +33,14 @@ export function QueueList({
   sort: SortKey;
   loading: boolean;
   triaging: Set<string>;
-  counts: { total: number; pending: number; escalated: number; untriaged: number };
+  counts: {
+    total: number;
+    pending: number;
+    approved: number;
+    rejected: number;
+    escalated: number;
+    untriaged: number;
+  };
   bulk: BulkState;
   onSelect: (id: string) => void;
   onFilters: (f: Filters) => void;
@@ -69,34 +76,48 @@ export function QueueList({
           <Button
             variant="ink"
             size="md"
-            className={`queue-metric ${filters.status === "pending" ? "is-active" : ""}`}
+            className={`queue-metric metric-pending ${filters.status === "pending" ? "is-active" : ""}`}
             onClick={() =>
               onFilters({ ...filters, status: filters.status === "pending" ? "" : "pending" })
             }
             title="Show only tickets nobody has decided on yet"
           >
             <span className="metric-value">{counts.pending}</span>
-            <span className="metric-label">To review</span>
+            <span className="metric-label">Pending</span>
+          </Button>
+          <Button
+            variant="ink"
+            size="md"
+            className={`queue-metric metric-approved ${filters.status === "approved" ? "is-active" : ""}`}
+            onClick={() =>
+              onFilters({ ...filters, status: filters.status === "approved" ? "" : "approved" })
+            }
+            title="Show tickets approved by a reviewer"
+          >
+            <span className="metric-value">{counts.approved}</span>
+            <span className="metric-label">Approved</span>
+          </Button>
+          <Button
+            variant="ink"
+            size="md"
+            className={`queue-metric metric-rejected ${filters.status === "rejected" ? "is-active" : ""}`}
+            onClick={() =>
+              onFilters({ ...filters, status: filters.status === "rejected" ? "" : "rejected" })
+            }
+            title="Show tickets rejected by a reviewer"
+          >
+            <span className="metric-value">{counts.rejected}</span>
+            <span className="metric-label">Rejected</span>
           </Button>
           <Button
             variant="ink"
             size="md"
             className={`queue-metric metric-escalated ${filters.escalatedOnly ? "is-active" : ""}`}
             onClick={() => onFilters({ ...filters, escalatedOnly: !filters.escalatedOnly })}
-            title="Show only tickets the policy flagged for a human"
+            title="Show tickets the policy flagged for human attention"
           >
             <span className="metric-value">{counts.escalated}</span>
             <span className="metric-label">Escalated</span>
-          </Button>
-          <Button
-            variant="ink"
-            size="md"
-            className={`queue-metric metric-unclassified ${sort === "priority" ? "is-sorted" : ""}`}
-            onClick={() => onSort("priority")}
-            title="Tickets with no classification yet. Use 'Classify all' in the header to run them."
-          >
-            <span className="metric-value">{counts.untriaged}</span>
-            <span className="metric-label">Unclassified</span>
           </Button>
         </div>
 

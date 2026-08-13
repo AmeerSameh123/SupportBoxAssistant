@@ -294,6 +294,8 @@ export function useReviewQueue(toast: ReturnType<typeof useToasts>["toast"]) {
     () => ({
       total: items.length,
       pending: items.filter((i) => i.review.status === "pending").length,
+      approved: items.filter((i) => i.review.status === "approved").length,
+      rejected: items.filter((i) => i.review.status === "rejected").length,
       escalated: items.filter((i) => i.triage?.escalate).length,
       untriaged: items.filter((i) => !i.triage).length,
     }),

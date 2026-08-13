@@ -31,7 +31,7 @@ export function QueueItem({
           "ticket-row",
           selected ? "is-selected" : "",
           busy ? "is-busy" : "",
-          review.status !== "pending" ? `is-${review.status}` : "",
+          `is-${review.status}`,
         ].filter(Boolean).join(" ")}
         onClick={onSelect}
         aria-current={selected ? "true" : undefined}
@@ -53,6 +53,10 @@ export function QueueItem({
           <span className="ticket-subject">{ticket.subject || <em>No subject</em>}</span>
 
           <span className="ticket-row-signals">
+            <span className={`queue-review-status ${review.status}`}>
+              <span aria-hidden="true" />
+              {review.status === "pending" ? "Pending" : review.status}
+            </span>
             {busy ? (
               <span className="classification-working">
                 <span className="spinner" />
@@ -70,9 +74,6 @@ export function QueueItem({
         </span>
 
         <span className="ticket-row-state">
-          {review.status !== "pending" && (
-            <span className={`review-marker ${review.status}`} title={review.status} />
-          )}
           <ChevronRight size={16} className="row-chevron" />
         </span>
       </motion.button>

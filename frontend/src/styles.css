@@ -791,7 +791,7 @@ kbd {
 
 .queue-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-bottom: 15px;
   padding-block: 12px;
   border-block: 1px solid var(--line);
@@ -848,6 +848,35 @@ kbd {
   font-weight: 560;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.metric-pending .metric-value { color: var(--warning-ink); }
+.metric-approved .metric-value { color: var(--success-ink); }
+.metric-rejected .metric-value { color: var(--danger-ink); }
+.metric-escalated .metric-value { color: var(--accent-ink); }
+
+.queue-metric.metric-pending.is-active {
+  color: var(--warning-ink);
+  background: var(--warning-soft);
+}
+
+.queue-metric.metric-approved.is-active {
+  color: var(--success-ink);
+  background: var(--success-soft);
+}
+
+.queue-metric.metric-rejected.is-active {
+  color: var(--danger-ink);
+  background: var(--danger-soft);
+}
+
+.queue-metric.metric-escalated.is-active {
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+}
+
+.queue-metric.is-active .metric-value {
+  color: currentColor;
 }
 
 .queue-search {
@@ -1031,6 +1060,21 @@ kbd {
   background: var(--accent-soft);
 }
 
+.ticket-row.is-pending:not(.is-selected) .sender-avatar {
+  color: var(--warning-ink);
+  background: var(--warning-soft);
+}
+
+.ticket-row.is-approved:not(.is-selected) .sender-avatar {
+  color: var(--success-ink);
+  background: var(--success-soft);
+}
+
+.ticket-row.is-rejected:not(.is-selected) .sender-avatar {
+  color: var(--danger-ink);
+  background: var(--danger-soft);
+}
+
 .ticket-row-content {
   display: flex;
   min-width: 0;
@@ -1084,6 +1128,8 @@ kbd {
   display: flex;
   min-height: 20px;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .ticket-row-state {
@@ -1135,6 +1181,41 @@ kbd {
   color: var(--ink-muted);
   font-size: 10.5px;
   font-weight: 580;
+}
+
+.queue-review-status {
+  display: inline-flex;
+  min-height: 20px;
+  align-items: center;
+  gap: 5px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 9.5px;
+  font-weight: 620;
+  line-height: 1;
+  text-transform: capitalize;
+}
+
+.queue-review-status > span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.queue-review-status.pending {
+  color: var(--warning-ink);
+  background: var(--warning-soft);
+}
+
+.queue-review-status.approved {
+  color: var(--success-ink);
+  background: var(--success-soft);
+}
+
+.queue-review-status.rejected {
+  color: var(--danger-ink);
+  background: var(--danger-soft);
 }
 
 .signal-dot {
