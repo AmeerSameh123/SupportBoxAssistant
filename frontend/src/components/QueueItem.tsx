@@ -1,5 +1,8 @@
 import type { TicketView } from "../api/types";
+import { ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import { TriageBadges } from "./TriageBadges";
+import { Avatar, AvatarFallback } from "./ui/Avatar";
 
 export function QueueItem({
   view,
@@ -13,32 +16,66 @@ export function QueueItem({
   onSelect: () => void;
 }) {
   const { ticket, triage, review } = view;
+  const senderName = ticket.sender.split("@")[0]?.replace(/[._-]+/g, " ") || "Customer";
+  const senderInitial = senderName.charAt(0).toUpperCase();
+  const received = new Date(ticket.received_at).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
 
   return (
-    <li>
-      <button
+    <li className="ticket-list-item">
+      <motion.button
         type="button"
-        className={`queue-item ${selected ? "selected" : ""} status-${review.status}`}
+        className={[
+          "ticket-row",
+          selected ? "is-selected" : "",
+          busy ? "is-busy" : "",
+          review.status !== "pending" ? `is-${review.status}` : "",
+        ].filter(Boolean).join(" ")}
         onClick={onSelect}
         aria-current={selected ? "true" : undefined}
+        whileHover={{ x: selected ? 0 : 3 }}
+        whileTap={{ scale: 0.992 }}
+        transition={{ duration: 0.16, ease: [0.22, 1, 0.36, 1] }}
       >
-        <div className="queue-item-top">
-          <span className="ticket-id">{ticket.id}</span>
-          <span className={`status-dot ${review.status}`} title={`Review status: ${review.status}`} />
-        </div>
+        <Avatar className="sender-avatar" aria-hidden="true">
+          <AvatarFallback>{senderInitial}</AvatarFallback>
+        </Avatar>
 
-        <div className="subject">{ticket.subject || <em>(no subject)</em>}</div>
+        <span className="ticket-row-content">
+          <span className="ticket-row-meta">
+            <span className="ticket-id">{ticket.id}</span>
+            <span className="sender-name">{senderName}</span>
+            <span className="received-date">{received}</span>
+          </span>
 
-        {busy ? (
-          <div className="muted small">triaging…</div>
-        ) : triage ? (
-          <TriageBadges triage={triage} compact />
-        ) : (
-          // Not an error state: the list serves triage from cache only, so an
-          // untriaged ticket simply has not been run yet.
-          <div className="muted small">not triaged yet</div>
-        )}
-      </button>
+          <span className="ticket-subject">{ticket.subject || <em>No subject</em>}</span>
+
+          <span className="ticket-row-signals">
+            {busy ? (
+              <span className="classification-working">
+                <span className="spinner" />
+                Classifying
+              </span>
+            ) : triage ? (
+              <TriageBadges triage={triage} compact />
+            ) : (
+              <span className="needs-classification">
+                <span className="signal-dot" aria-hidden="true" />
+                Needs classification
+              </span>
+            )}
+          </span>
+        </span>
+
+        <span className="ticket-row-state">
+          {review.status !== "pending" && (
+            <span className={`review-marker ${review.status}`} title={review.status} />
+          )}
+          <ChevronRight size={16} className="row-chevron" />
+        </span>
+      </motion.button>
     </li>
   );
 }

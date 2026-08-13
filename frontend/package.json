@@ -9,10 +9,25 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },
-  "//": "No UI kit, no router, no state library. Six components do not need them, and a smaller dependency surface is a security property as well as a review-time one (PRD 10.4).",
+  "//": "Accessible component primitives are local shadcn-style wrappers over focused Radix packages; Lucide, Motion, Sonner, and self-hosted variable fonts provide the visual and interaction layer.",
   "dependencies": {
+    "@fontsource-variable/bricolage-grotesque": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@radix-ui/react-avatar": "^1.2.6",
+    "@radix-ui/react-collapsible": "^1.1.20",
+    "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-progress": "^1.1.16",
+    "@radix-ui/react-select": "^2.3.7",
+    "@radix-ui/react-slot": "^1.3.3",
+    "@radix-ui/react-tooltip": "^1.2.16",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.31.0",
+    "motion": "^13.1.0",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "sonner": "^2.0.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",

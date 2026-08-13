@@ -75,6 +75,17 @@ export interface TicketList {
   offset: number;
 }
 
+/** GET /readyz. Returns 200 when the model answered, 503 when degraded — but
+ *  carries the same body either way, so the UI can explain *why* it is degraded
+ *  instead of just failing quietly. */
+export interface Readiness {
+  status: "ready" | "degraded";
+  llm_reachable: boolean;
+  tickets_loaded: number;
+  model: string;
+  prompt_version: string;
+}
+
 /** RFC 9457 problem+json, which is what every backend error looks like. */
 export interface Problem {
   type: string;

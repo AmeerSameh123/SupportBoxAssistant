@@ -196,10 +196,39 @@ Base path `/api/v1`. Errors are RFC 9457 `application/problem+json`.
 | `PATCH` | `/reviews/{ticket_id}` | approve / reject / edit; `409` on stale version |
 
 Listing never triggers a model call — 30 synchronous calls on first paint would
-make the queue unusable. The UI fills each row in on demand.
+make the queue unusable. The UI fills rows in on demand, or all at once via
+**Classify all**.
 
 An LLM outage returns **200 with `degraded: true`**, not 503. A degraded answer
 beats no answer.
+
+### Review queue
+
+One screen: the queue on the left, the selected ticket on the right.
+
+- **Classifying is the primary action, and it looks like one.** An unclassified
+  ticket shows a full-width *Classify this ticket* button; the header carries
+  *Classify all (N)* for the whole backlog, with a progress bar. Because listing
+  serves triage from cache only, a cold queue would otherwise look broken.
+- **Every action reports back.** Triage, approve, reject and every failure raise
+  a toast naming the ticket and the outcome (`T-014 classified — security ·
+  urgent · escalated`). Errors carry the real reason and stay up long enough to
+  read. In-flight runs disable the editor and show a spinner in both panes, so a
+  re-run that returns the same verdict still looks like something happened.
+- **Degradation is visible, not silent.** A chip in the header polls `/readyz`:
+  green when the model answered, amber when it is unreachable and results are
+  coming from the keyword fallback, red when the API is down. Fallback results
+  are also badged `degraded` per ticket.
+- Queue sorts urgent-first by default, filters by status / category / escalated,
+  and searches id, subject, sender and body client-side.
+- Keyboard: `j` / `k` move, `t` classifies, `/` searches, `?` lists shortcuts.
+- Confidence is shown with its caveat attached — the eval found it barely
+  separates right from wrong answers, so the UI calls it a weak signal rather
+  than presenting a percentage as authority.
+
+Colour carries meaning rather than decoration: red / amber / green are reserved
+for priority and outcome, so the accent is indigo and never competes with them.
+Verified at zero WCAG AA contrast failures in both light and dark themes.
 
 ### Security
 

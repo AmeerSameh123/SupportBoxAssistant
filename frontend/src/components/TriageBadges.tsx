@@ -1,49 +1,83 @@
 import type { Triage } from "../api/types";
+import { Badge } from "./ui/Badge";
 
-/**
- * Category, priority, and the flags a reviewer must not miss.
- *
- * `escalate` carries a tooltip listing the policy reasons that fired.
- * "Escalated" alone tells a reviewer nothing; "escalated: security_category,
- * urgent_priority" tells them what to look at first.
- */
-export function TriageBadges({ triage, compact = false }: { triage: Triage; compact?: boolean }) {
+const CATEGORY_LABELS = {
+  billing: "Billing",
+  bug: "Bug",
+  feature_request: "Feature",
+  account: "Account",
+  security: "Security",
+  other: "Other",
+} as const;
+
+export function TriageBadges({
+  triage,
+  compact = false,
+  size = "sm",
+}: {
+  triage: Triage;
+  compact?: boolean;
+  size?: "sm" | "lg";
+}) {
+  const large = size === "lg" ? " is-large" : "";
+
   return (
-    <div className="badges">
-      <span className={`badge cat cat-${triage.category}`}>
-        {triage.category.replace("_", " ")}
-      </span>
-      <span className={`badge pri pri-${triage.priority}`}>{triage.priority}</span>
+    <span className={`signal-chips ${compact ? "is-compact" : ""}`}>
+      <Badge className={`signal-chip category-chip category-${triage.category}${large}`}>
+        <span className="badge-dot" aria-hidden="true" />
+        {CATEGORY_LABELS[triage.category]}
+      </Badge>
+      <Badge className={`signal-chip priority-chip priority-${triage.priority}${large}`}>
+        <span className="badge-dot" aria-hidden="true" />
+        {triage.priority}
+      </Badge>
 
       {triage.escalate && (
-        <span
-          className="badge flag escalate"
-          title={`Escalated because: ${triage.telemetry.escalation_reasons.join(", ")}`}
+        <Badge
+          tone="primary"
+          className={`signal-chip escalation-chip${large}`}
+          title={`Escalated because: ${triage.telemetry.escalation_reasons
+            .join(", ")
+            .replace(/_/g, " ")}`}
         >
-          escalate
-        </span>
+          Escalated
+        </Badge>
       )}
       {triage.injection_suspected && (
-        <span className="badge flag danger" title="Contains instructions aimed at an automated system. Not actioned.">
-          injection
-        </span>
+        <Badge
+          tone="danger"
+          className={`signal-chip critical-chip${large}`}
+          title="This message contains instructions aimed at an automated system. They were not followed."
+        >
+          Injection risk
+        </Badge>
       )}
       {triage.spam_suspected && (
-        <span className="badge flag danger" title="Looks like spam or phishing. No reply has been drafted.">
-          spam
-        </span>
+        <Badge
+          tone="danger"
+          className={`signal-chip critical-chip${large}`}
+          title="Looks like spam or phishing. No reply has been drafted."
+        >
+          Spam
+        </Badge>
       )}
       {triage.degraded && (
-        <span className="badge flag warn" title="The model was unavailable; this came from the keyword fallback.">
-          degraded
-        </span>
+        <Badge
+          tone="warning"
+          className={`signal-chip degraded-chip${large}`}
+          title="The model was unavailable; this came from the keyword fallback."
+        >
+          Fallback
+        </Badge>
       )}
       {!compact && triage.telemetry.repairs.length > 0 && (
-        <span className="badge flag muted" title={`Malformed model output was repaired: ${triage.telemetry.repairs.join(", ")}`}>
-          repaired
-        </span>
+        <Badge
+          className={`signal-chip repaired-chip${large}`}
+          title={`Malformed model output was repaired: ${triage.telemetry.repairs.join(", ")}`}
+        >
+          Output repaired
+        </Badge>
       )}
-      {!compact && <span className="badge stage">{triage.telemetry.stage}</span>}
-    </div>
+    </span>
   );
 }

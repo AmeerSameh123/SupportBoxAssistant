@@ -1,4 +1,12 @@
-import type { Problem, Review, ReviewStatus, TicketList, TicketView, Triage } from "./types";
+import type {
+  Problem,
+  Readiness,
+  Review,
+  ReviewStatus,
+  TicketList,
+  TicketView,
+  Triage,
+} from "./types";
 
 // Empty by default: Vite proxies /api to the backend, so the browser sees a
 // same-origin request and no CORS negotiation happens at all.
@@ -45,10 +53,18 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     } catch {
       problem = null;
     }
+    // A 5xx with no problem+json body is almost always the dev proxy reporting
+    // that nothing is listening upstream — the backend died or was restarted.
+    // "Request failed (500)" is accurate and useless; say what to actually do.
+    const fallback =
+      response.status >= 500 && !problem
+        ? "The backend did not respond. It may have stopped — check its terminal window, then reload."
+        : `Request failed (${response.status})`;
+
     throw new ApiError(
       response.status,
       problem,
-      problem?.detail || problem?.title || `Request failed (${response.status})`,
+      problem?.detail || problem?.title || fallback,
     );
   }
 
@@ -75,4 +91,25 @@ export const api = {
       version: number;
     },
   ) => request<Review>(`/reviews/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+
+  /**
+   * Readiness, read directly rather than through `request`.
+   *
+   * `/readyz` answers 503 when the LLM is unreachable but still returns a full,
+   * meaningful body. Routing it through `request` would turn that into a thrown
+   * ApiError and throw away the one payload that explains the degradation — so
+   * this reads the body on both 200 and 503, and only treats a network-level
+   * failure as "offline".
+   */
+  async readiness(): Promise<Readiness | null> {
+    try {
+      const response = await fetch(`${BASE}/api/v1/readyz`, {
+        headers: TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {},
+      });
+      if (response.status !== 200 && response.status !== 503) return null;
+      return (await response.json()) as Readiness;
+    } catch {
+      return null; // backend not running at all
+    }
+  },
 };
